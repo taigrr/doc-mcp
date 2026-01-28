@@ -115,7 +115,8 @@ func (s *Server) crackBase64(ctx context.Context, req *mcp.CallToolRequest, args
 		}, nil, nil
 	}
 
-	data, err := base64.StdEncoding.DecodeString(args.Data)
+	// Try standard base64 first, then URL-safe variants
+	data, err := decodeBase64(args.Data)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -136,6 +137,27 @@ func (s *Server) crackBase64(ctx context.Context, req *mcp.CallToolRequest, args
 	}
 
 	return formatResult(doc), nil, nil
+}
+
+// decodeBase64 tries multiple base64 encodings (standard, URL-safe, with/without padding)
+func decodeBase64(s string) ([]byte, error) {
+	// Try standard encoding first
+	if data, err := base64.StdEncoding.DecodeString(s); err == nil {
+		return data, nil
+	}
+	// Try URL-safe encoding
+	if data, err := base64.URLEncoding.DecodeString(s); err == nil {
+		return data, nil
+	}
+	// Try raw standard (no padding)
+	if data, err := base64.RawStdEncoding.DecodeString(s); err == nil {
+		return data, nil
+	}
+	// Try raw URL-safe (no padding)
+	if data, err := base64.RawURLEncoding.DecodeString(s); err == nil {
+		return data, nil
+	}
+	return nil, fmt.Errorf("invalid base64 encoding")
 }
 
 func formatResult(doc crack.Document) *mcp.CallToolResult {
