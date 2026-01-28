@@ -2,11 +2,9 @@ module github.com/taigrr/doc-mcp
 
 go 1.25.6
 
-replace github.com/taigrr/document-crack => ../document-crack
-
 require (
 	github.com/modelcontextprotocol/go-sdk v1.2.0
-	github.com/taigrr/document-crack v0.0.0
+	github.com/taigrr/document-crack v1.0.0
 )
 
 require (
