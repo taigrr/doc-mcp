@@ -19,21 +19,7 @@ go install github.com/taigrr/doc-mcp@latest
 
 ## Usage
 
-### With Claude Desktop
-
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "doc-mcp": {
-      "command": "doc-mcp"
-    }
-  }
-}
-```
-
-### With Crush
+### With [Crush](https://github.com/taigrr/crush)
 
 Add to your Crush config:
 
