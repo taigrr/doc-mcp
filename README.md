@@ -19,7 +19,7 @@ go install github.com/taigrr/doc-mcp@latest
 
 ## Usage
 
-### With [Crush](https://github.com/taigrr/crush)
+### With [Crush](https://github.com/charmbracelet/crush)
 
 Add to your Crush config:
 
