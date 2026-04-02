@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	crack "github.com/taigrr/document-crack"
@@ -18,6 +19,7 @@ const (
 	DefaultPageSize    = 10000 // 10k chars per page
 	DefaultMaxDownload = 10    // 10MB default download limit
 	MaxDownloadLimit   = 100   // 100MB hard limit
+	HTTPTimeout        = 60 * time.Second
 )
 
 // Tool argument types with optional pagination/limits
@@ -180,7 +182,8 @@ func downloadWithLimit(ctx context.Context, url string, maxBytes int64) ([]byte,
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{Timeout: HTTPTimeout}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download: %w", err)
 	}
