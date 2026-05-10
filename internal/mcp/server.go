@@ -25,14 +25,14 @@ const (
 // Tool argument types with optional pagination/limits
 type CrackFileArgs struct {
 	Path     string `json:"path" jsonschema:"Path to the document file to extract text from"`
-	MaxChars int    `json:"max_chars,omitempty" jsonschema:"Maximum characters to return (default 50000, 0 for unlimited)"`
+	MaxChars int    `json:"max_chars,omitempty" jsonschema:"Maximum characters to return (default 50000, -1 for unlimited)"`
 	Page     int    `json:"page,omitempty" jsonschema:"Page number for paginated results (1-indexed, default 1)"`
 	PageSize int    `json:"page_size,omitempty" jsonschema:"Characters per page (default 10000)"`
 }
 
 type CrackURLArgs struct {
 	URL           string `json:"url" jsonschema:"URL of the document to download and extract text from"`
-	MaxChars      int    `json:"max_chars,omitempty" jsonschema:"Maximum characters to return (default 50000, 0 for unlimited)"`
+	MaxChars      int    `json:"max_chars,omitempty" jsonschema:"Maximum characters to return (default 50000, -1 for unlimited)"`
 	Page          int    `json:"page,omitempty" jsonschema:"Page number for paginated results (1-indexed, default 1)"`
 	PageSize      int    `json:"page_size,omitempty" jsonschema:"Characters per page (default 10000)"`
 	MaxDownloadMB int    `json:"max_download_mb,omitempty" jsonschema:"Maximum download size in MB (default 10, max 100)"`
@@ -40,7 +40,7 @@ type CrackURLArgs struct {
 
 type CrackBase64Args struct {
 	Data     string `json:"data" jsonschema:"Base64-encoded document content"`
-	MaxChars int    `json:"max_chars,omitempty" jsonschema:"Maximum characters to return (default 50000, 0 for unlimited)"`
+	MaxChars int    `json:"max_chars,omitempty" jsonschema:"Maximum characters to return (default 50000, -1 for unlimited)"`
 	Page     int    `json:"page,omitempty" jsonschema:"Page number for paginated results (1-indexed, default 1)"`
 	PageSize int    `json:"page_size,omitempty" jsonschema:"Characters per page (default 10000)"`
 }
