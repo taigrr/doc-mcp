@@ -383,13 +383,12 @@ func TestFormatResult_MaxCharsTruncation(t *testing.T) {
 }
 
 func TestDecodeBase64_URLEncoding(t *testing.T) {
-	// URL-safe base64 with + replaced by - and / by _
-	input := "SGVsbG8gV29ybGQ=" // same in standard, but test the path
+	input := "-_8="
 	data, err := decodeBase64(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if string(data) != "Hello World" {
-		t.Errorf("expected 'Hello World', got %q", string(data))
+	if got := fmt.Sprintf("% x", data); got != "fb ff" {
+		t.Errorf("expected decoded bytes fb ff, got %s", got)
 	}
 }
