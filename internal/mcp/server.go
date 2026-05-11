@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	crack "github.com/taigrr/document-crack"
+	crack "github.com/taigrr/document-crack/v2"
 )
 
 // Defaults

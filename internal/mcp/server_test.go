@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	gomcp "github.com/modelcontextprotocol/go-sdk/mcp"
-	crack "github.com/taigrr/document-crack"
+	crack "github.com/taigrr/document-crack/v2"
 )
 
 // resultText extracts the text from the first content item in a CallToolResult.
