@@ -2,7 +2,6 @@ package mcp
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -19,17 +18,25 @@ func resultText(t *testing.T, result *gomcp.CallToolResult) string {
 	if len(result.Content) == 0 {
 		t.Fatal("no content in result")
 	}
-	data, err := json.Marshal(result.Content[0])
-	if err != nil {
-		t.Fatalf("failed to marshal content: %v", err)
+	text, ok := result.Content[0].(*gomcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content, got %T", result.Content[0])
 	}
-	var obj struct {
-		Text string `json:"text"`
+	return text.Text
+}
+
+func requireTextContains(t *testing.T, result *gomcp.CallToolResult, want string) {
+	t.Helper()
+	if text := resultText(t, result); !strings.Contains(text, want) {
+		t.Fatalf("expected output to contain %q, got:\n%s", want, text)
 	}
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("failed to unmarshal content: %v", err)
+}
+
+func requireTextNotContains(t *testing.T, result *gomcp.CallToolResult, want string) {
+	t.Helper()
+	if text := resultText(t, result); strings.Contains(text, want) {
+		t.Fatalf("expected output not to contain %q, got:\n%s", want, text)
 	}
-	return obj.Text
 }
 
 func newTestDoc(docType crack.FileType, content string) crack.Document {
@@ -121,6 +128,9 @@ func TestFormatResult_NoPagination(t *testing.T) {
 	if len(result.Content) != 1 {
 		t.Fatalf("expected 1 content item, got %d", len(result.Content))
 	}
+	requireTextContains(t, result, "Document Type: TXT")
+	requireTextContains(t, result, "Hello World")
+	requireTextNotContains(t, result, "--- Page")
 }
 
 func TestFormatResult_Pagination(t *testing.T) {
@@ -134,6 +144,8 @@ func TestFormatResult_Pagination(t *testing.T) {
 	if result.IsError {
 		t.Error("expected no error")
 	}
+	requireTextContains(t, result, "--- Page 1/4 (101 total chars) ---")
+	requireTextContains(t, result, "Use page=2 to continue")
 }
 
 func TestFormatResult_Truncation(t *testing.T) {
@@ -147,6 +159,9 @@ func TestFormatResult_Truncation(t *testing.T) {
 	if result.IsError {
 		t.Error("expected no error")
 	}
+	requireTextContains(t, result, strings.Repeat("B", 50))
+	requireTextContains(t, result, "--- Page 1/1 (201 total chars) ---")
+	requireTextNotContains(t, result, "Use page=2 to continue")
 }
 
 func TestCrackFile_EmptyPath(t *testing.T) {
@@ -236,6 +251,9 @@ func TestFormatResult_MultiPage(t *testing.T) {
 	if result.IsError {
 		t.Error("expected no error")
 	}
+	requireTextContains(t, result, "Title: Test Doc")
+	requireTextContains(t, result, "[Page 1]")
+	requireTextContains(t, result, "[Page 2]")
 }
 
 func TestFormatResult_PageBeyondRange(t *testing.T) {
@@ -245,6 +263,7 @@ func TestFormatResult_PageBeyondRange(t *testing.T) {
 	if result.IsError {
 		t.Error("expected no error even for out-of-range page")
 	}
+	requireTextContains(t, result, "--- Page 1/1 (6 total chars) ---")
 }
 
 func TestDownloadWithLimit_Success(t *testing.T) {
