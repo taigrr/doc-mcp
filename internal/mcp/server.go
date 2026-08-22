@@ -15,6 +15,7 @@ import (
 
 // Defaults
 const (
+	Version            = "1.1.1"
 	DefaultMaxChars    = 50000 // 50k chars default
 	DefaultPageSize    = 10000 // 10k chars per page
 	DefaultMaxDownload = 10    // 10MB default download limit
@@ -79,7 +80,7 @@ type Server struct {
 func NewServer() *mcp.Server {
 	mcpServer := mcp.NewServer(&mcp.Implementation{
 		Name:    "doc-mcp",
-		Version: "1.1.0",
+		Version: Version,
 	}, nil)
 
 	s := &Server{
