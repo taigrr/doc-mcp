@@ -15,7 +15,7 @@ import (
 
 // Defaults
 const (
-	Version            = "1.1.1"
+	Version            = "1.1.2"
 	DefaultMaxChars    = 50000 // 50k chars default
 	DefaultPageSize    = 10000 // 10k chars per page
 	DefaultMaxDownload = 10    // 10MB default download limit
