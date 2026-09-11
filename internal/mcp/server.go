@@ -256,7 +256,8 @@ func formatResult(doc crack.Document, opts paginationOpts) *mcp.CallToolResult {
 		contentBuilder.WriteString("\n")
 	}
 	fullContent := contentBuilder.String()
-	totalChars := len(fullContent)
+	contentRunes := []rune(fullContent)
+	totalChars := len(contentRunes)
 
 	// Apply pagination
 	if opts.maxChars > 0 && opts.pageSize > 0 {
@@ -282,14 +283,14 @@ func formatResult(doc crack.Document, opts paginationOpts) *mcp.CallToolResult {
 			start = totalChars
 		}
 
-		pageContent := fullContent[start:end]
+		pageContentRunes := contentRunes[start:end]
 
 		// Truncate if still over maxChars
-		if len(pageContent) > opts.maxChars {
-			pageContent = pageContent[:opts.maxChars]
+		if len(pageContentRunes) > opts.maxChars {
+			pageContentRunes = pageContentRunes[:opts.maxChars]
 		}
 
-		sb.WriteString(pageContent)
+		sb.WriteString(string(pageContentRunes))
 
 		// Add pagination info
 		sb.WriteString(fmt.Sprintf("\n\n--- Page %d/%d (%d total chars) ---", page, totalPages, totalChars))
@@ -298,14 +299,12 @@ func formatResult(doc crack.Document, opts paginationOpts) *mcp.CallToolResult {
 		}
 	} else {
 		// No pagination, but still respect maxChars
-		content := fullContent
-		if opts.maxChars > 0 && len(content) > opts.maxChars {
-			content = content[:opts.maxChars]
-			sb.WriteString(content)
+		if opts.maxChars > 0 && totalChars > opts.maxChars {
+			sb.WriteString(string(contentRunes[:opts.maxChars]))
 			sb.WriteString(fmt.Sprintf("\n\n--- Truncated at %d chars (%d total) ---", opts.maxChars, totalChars))
 			sb.WriteString("\nUse page/page_size options to paginate, or max_chars=-1 for unlimited")
 		} else {
-			sb.WriteString(content)
+			sb.WriteString(fullContent)
 		}
 	}
 
