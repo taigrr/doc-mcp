@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -128,8 +129,7 @@ func (s *Server) crackURL(ctx context.Context, req *mcp.CallToolRequest, args Cr
 		return errorResult("url is required"), nil, nil
 	}
 
-	// Validate URL scheme
-	if !strings.HasPrefix(args.URL, "http://") && !strings.HasPrefix(args.URL, "https://") {
+	if !isHTTPURL(args.URL) {
 		return errorResult("url must use http or https scheme"), nil, nil
 	}
 
@@ -210,6 +210,17 @@ func downloadWithLimit(ctx context.Context, url string, maxBytes int64) ([]byte,
 	}
 
 	return data, nil
+}
+
+func isHTTPURL(rawURL string) bool {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+	if parsedURL.Host == "" {
+		return false
+	}
+	return strings.EqualFold(parsedURL.Scheme, "http") || strings.EqualFold(parsedURL.Scheme, "https")
 }
 
 // decodeBase64 tries multiple base64 encodings (standard, URL-safe, with/without padding)

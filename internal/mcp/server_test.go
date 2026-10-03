@@ -208,6 +208,70 @@ func TestCrackURL_InvalidScheme(t *testing.T) {
 	}
 }
 
+func TestIsHTTPURL(t *testing.T) {
+	tests := []struct {
+		name   string
+		rawURL string
+		want   bool
+	}{
+		{
+			name:   "http",
+			rawURL: "http://example.com/file.pdf",
+			want:   true,
+		},
+		{
+			name:   "https",
+			rawURL: "https://example.com/file.pdf",
+			want:   true,
+		},
+		{
+			name:   "uppercase scheme",
+			rawURL: "HTTPS://example.com/file.pdf",
+			want:   true,
+		},
+		{
+			name:   "non-http scheme",
+			rawURL: "ftp://example.com/file.pdf",
+			want:   false,
+		},
+		{
+			name:   "missing host",
+			rawURL: "https:///file.pdf",
+			want:   false,
+		},
+		{
+			name:   "missing scheme",
+			rawURL: "example.com/file.pdf",
+			want:   false,
+		},
+		{
+			name:   "invalid URL",
+			rawURL: "http://[invalid]:99999",
+			want:   false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := isHTTPURL(test.rawURL); got != test.want {
+				t.Errorf("isHTTPURL(%q) = %v, want %v", test.rawURL, got, test.want)
+			}
+		})
+	}
+}
+
+func TestCrackURL_MissingHost(t *testing.T) {
+	s := &Server{}
+	result, _, err := s.crackURL(context.TODO(), nil, CrackURLArgs{URL: "https:///file.pdf"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !result.IsError {
+		t.Error("expected error for URL without host")
+	}
+	requireTextContains(t, result, "url must use http or https scheme")
+}
+
 func TestCrackBase64_EmptyData(t *testing.T) {
 	s := &Server{}
 	result, _, err := s.crackBase64(context.TODO(), nil, CrackBase64Args{})
