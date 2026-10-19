@@ -465,6 +465,37 @@ func TestFormatResult_MaxCharsTruncation(t *testing.T) {
 	}
 }
 
+func TestFormatResult_TruncatesUnicodeByRune(t *testing.T) {
+	doc := newTestDoc(crack.TypeTXT, "ééééé")
+	opts := paginationOpts{maxChars: 3, page: 1, pageSize: 0}
+
+	result := formatResult(doc, opts)
+
+	text := resultText(t, result)
+	requireTextContains(t, result, "ééé")
+	requireTextContains(t, result, "--- Truncated at 3 chars (6 total) ---")
+	if strings.Contains(text, "\uFFFD") {
+		t.Fatalf("expected valid UTF-8 without replacement characters, got:\n%s", text)
+	}
+}
+
+func TestFormatResult_PaginatesUnicodeByRune(t *testing.T) {
+	doc := newTestDoc(crack.TypeTXT, "ééééé")
+	opts := newPaginationOpts(10, 2, 2)
+
+	result := formatResult(doc, opts)
+
+	text := resultText(t, result)
+	requireTextContains(t, result, "--- Page 2/3 (6 total chars) ---")
+	requireTextContains(t, result, "Use page=3 to continue")
+	if !strings.Contains(text, "éé") {
+		t.Fatalf("expected second page to contain two complete runes, got:\n%s", text)
+	}
+	if strings.Contains(text, "\uFFFD") {
+		t.Fatalf("expected valid UTF-8 without replacement characters, got:\n%s", text)
+	}
+}
+
 func TestDecodeBase64_URLEncoding(t *testing.T) {
 	input := "-_8="
 	data, err := decodeBase64(input)
