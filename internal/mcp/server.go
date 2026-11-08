@@ -272,9 +272,10 @@ func formatResult(doc crack.Document, opts paginationOpts) *mcp.CallToolResult {
 
 	// Apply pagination
 	if opts.maxChars > 0 && opts.pageSize > 0 {
-		totalPages := (totalChars + opts.pageSize - 1) / opts.pageSize
-		if totalPages == 0 {
-			totalPages = 1
+		// Avoid overflow when pageSize is near the maximum int value.
+		totalPages := 1
+		if totalChars > 0 {
+			totalPages = 1 + (totalChars-1)/opts.pageSize
 		}
 
 		page := opts.page
@@ -286,13 +287,7 @@ func formatResult(doc crack.Document, opts paginationOpts) *mcp.CallToolResult {
 		}
 
 		start := (page - 1) * opts.pageSize
-		end := start + opts.pageSize
-		if end > totalChars {
-			end = totalChars
-		}
-		if start > totalChars {
-			start = totalChars
-		}
+		end := start + min(opts.pageSize, totalChars-start)
 
 		pageContentRunes := contentRunes[start:end]
 
