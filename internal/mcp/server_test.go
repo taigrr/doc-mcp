@@ -506,3 +506,23 @@ func TestDecodeBase64_URLEncoding(t *testing.T) {
 		t.Errorf("expected decoded bytes fb ff, got %s", got)
 	}
 }
+
+func TestFormatResult_LargePageSize(t *testing.T) {
+	maxInt := int(^uint(0) >> 1)
+	for _, content := range []string{"", "hello", "é世界"} {
+		for _, pageSize := range []int{maxInt, maxInt - 1} {
+			for _, page := range []int{1, maxInt} {
+				t.Run(fmt.Sprintf("%q/size=%d/page=%d", content, pageSize, page), func(t *testing.T) {
+					doc := newTestDoc(crack.TypeTXT, content)
+					result := formatResult(doc, newPaginationOpts(100, page, pageSize))
+					requireTextContains(t, result, "--- Content ---\n"+content+"\n")
+					requireTextContains(t, result, fmt.Sprintf("--- Page 1/1 (%d total chars) ---", len([]rune(content))+1))
+					requireTextNotContains(t, result, "to continue")
+				})
+			}
+		}
+	}
+	// An entirely empty document must also remain a single empty page.
+	result := formatResult(crack.Document{Type: crack.TypeTXT}, newPaginationOpts(100, maxInt, maxInt))
+	requireTextContains(t, result, "--- Page 1/1 (0 total chars) ---")
+}
