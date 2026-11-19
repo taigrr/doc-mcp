@@ -1,8 +1,6 @@
 module github.com/taigrr/doc-mcp
 
-go 1.27.1
-
-toolchain go1.27.3
+go 1.27.4
 
 require (
 	github.com/modelcontextprotocol/go-sdk v1.7.0
